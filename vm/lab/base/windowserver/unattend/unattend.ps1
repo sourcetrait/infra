@@ -131,6 +131,11 @@ function step_choco {
     Invoke-Expression (Invoke-RestMethod 'https://community.chocolatey.org/install.ps1')
 }
 
+function step_scoop {
+    # install scoop
+    Invoke-Expression (Invoke-RestMethod 'https://get.scoop.sh')
+}
+
 function step_nushell {
     $nu_exits = @(
         0 # success
@@ -148,7 +153,7 @@ function step_nushell {
     }
 }
 
-$CHOCO_PACKAGES = @('git','helix')
+$CHOCO_PACKAGES = @('git','helix','fd','ripgrep')
 
 function step_choco_packages {
     $choco_exits = @(
@@ -167,6 +172,43 @@ function step_choco_packages {
         }
         if ($exitcode -notin $choco_exits) {
             throw "[UNATTEND] ERROR Chocolatey failed to install: $pkg"
+        }
+    }
+}
+
+function step_scoop_packages {
+    $scoop_packages = @(
+        'sudo'
+        'git'
+        'helix'
+        'fd'
+        'ripgrep'
+        'ffmpeg' # BEGIN yazi
+        '7zip'
+        'jq'
+        'fzf'
+        'zoxide'
+        'resvg'
+        'imagemagick'
+        'yazi'   # END yazi
+    )
+    
+    $scoop_exits = @(
+        0 # success
+        1641 # success, reboot initiated
+        3010 # success, reboot required
+    )
+    
+    foreach ($pkg in $scoop_packages) {
+        try {
+            $PSNativeCommandUseErrorActionPreference = $false
+            scoop install $pkg --global
+            $exitcode = $LASTEXITCODE
+        } finally {
+            $PSNativeCommandUseErrorActionPreference = $true
+        }
+        if ($exitcode -notin $scoop_exits) {
+            throw "[UNATTEND] ERROR Scoop failed to install: $pkg"
         }
     }
 }
@@ -422,7 +464,8 @@ switch ($step) {
         step_password_policy
     }
     4 {
-        step_choco
+        #step_choco
+        step_scoop
         step_nushell
     }
     111 {
@@ -432,7 +475,8 @@ switch ($step) {
        step_user_pwrusr $img 'lab'
        step_vs
        step_rust
-       step_choco_packages
+       #step_choco_packages
+       step_scoop_packages
        step_sconfig
        step_ngen $img
        step_winre

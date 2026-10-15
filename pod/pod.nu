@@ -77,7 +77,7 @@ def "main build" [] {
         podman kill $cfg.container out+err>| ignore
         
         let image_id = (
-            podman build --build-arg BASE="localhost/sourcetrait/box:latest" --platform $cfg.host_platform --manifest $cfg.ref .
+            podman build --build-arg BASE="localhost/sourcetrait/srcbox:latest" --platform $cfg.host_platform --manifest $cfg.ref .
                 | tee { print }
                 | lines | last | str trim
         )
@@ -104,7 +104,10 @@ def "main create" [container: string, plate: string, force: bool = false] {
     let args = [
         --name $container
         -p $"($ssh_port):22"
+        --volume $"($container)_tmp:/tmp"
         --volume $"($container)_home:/home/box"
+        --volume $"($container)_home_tmp:/home/box/tmp"
+        --volume $"($container)_home_cache:/home/box/sys/cache"
         --pull=never
         $"localhost/($cfg.image):($cfg.version)"
     ]
