@@ -4,6 +4,14 @@ const INFRA_DIR: directory = path self .
 const CONFIG_DIRNAME: directory = 'sourcetrait/infra'
 const INETS: list<string> = [default test infra]
 
+# the config's [vm] table overrides these, key by key
+const VM_DEFAULTS: record<iso_dir: path, disk_dir: path, unattend_dir: path, group: string> = {
+    iso_dir: '/mnt/storage/kvm/iso'
+    disk_dir: '/mnt/storage/kvm/disk'
+    unattend_dir: '/mnt/storage/kvm/unattend'
+    group: 'vmusr'
+}
+
 const BUILDS: table<namepath: path, hostname: string, subnet: list<string>> = [
     [ namepath             hostname        subnet   ];
     [ 'lab/windowserver'   'windowserver'  [lab]    ]
@@ -32,7 +40,8 @@ def init [skip: bool = false] {
   }
 
   let cfg = open ($config_dir | path join 'config.toml')
-  
+  let vm = $VM_DEFAULTS | merge ($cfg | get -o vm | default {})
+
   mut lab_login_pubkeys = []
   for lab_key in $cfg.key.lab_logins {
     let pubkey = ($cfg.key.home | path join $"($lab_key).pub" | path expand)
@@ -59,9 +68,9 @@ def init [skip: bool = false] {
       infra_dir: $INFRA_DIR
       pwrusr_repo: $pwrusr_repo
       vm: {
-        iso_dir: '/mnt/storage/kvm/iso'
-        disk_dir: '/mnt/storage/kvm/disk'
-        unattend_dir: '/mnt/storage/kvm/unattend'
+        iso_dir: ($vm.iso_dir | path expand)
+        disk_dir: ($vm.disk_dir | path expand)
+        unattend_dir: ($vm.unattend_dir | path expand)
       },
       key: {
         lab_logins: $lab_login_pubkeys
@@ -70,7 +79,7 @@ def init [skip: bool = false] {
       }
     },
     group: {
-      vm: 'vmusr'
+      vm: $vm.group
     },
     cfg: $cfg,
     skip: $skip,

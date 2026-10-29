@@ -6,3 +6,9 @@ lab_dumb = "id_lab_dumb"
 lab_logins = [
   "id_lab_login"
 ]
+
+[vm]
+iso_dir = "/mnt/storage/kvm/iso"
+disk_dir = "/mnt/storage/kvm/disk"
+unattend_dir = "/mnt/storage/kvm/unattend"
+group = "vmusr"

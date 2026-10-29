@@ -12,6 +12,16 @@ SourceTrait Infra
 ## infra.nu
 - `./infra build <build>` Builds specified component (VM, Container, etc)
 
+### Configuration
+`$XDG_CONFIG_HOME/sourcetrait/infra/config.toml`, copied from
+`assets/xdg/config/config.toml` on first run.
+- `dumb_password` The lab accounts' password.
+- `[key]` The key directory (`home`), the throwaway lab key (`lab_dumb`), and
+  the public keys the lab accounts accept (`lab_logins`), each named under
+  `home` without its `.pub`.
+- `[vm]` The ISO, disk, and unattend directories, and the group that owns the
+  built images. A key left out keeps its default.
+
 
 Repository
 --------------------------------------------------------------------------------
