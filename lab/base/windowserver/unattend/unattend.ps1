@@ -223,9 +223,9 @@ function step_user_pwrusr {
 
     & E:\pwrusr\shells\powershell\mkpwrhome.ps1 "C:\Users\$user"
 
-    # setup config using pwrusr assets
+    # setup config using pwrusr assets, merged over the directories mkpwrhome made
     $config = "C:\Users\$user\.config"
-    Copy-Item 'E:\pwrusr\config\*' $config -Recurse
+    Copy-Item 'E:\pwrusr\config\*' $config -Recurse -Force
 
     Get-ChildItem -LiteralPath $config -Recurse -Force -File |
         ForEach-Object { $_.IsReadOnly = $false }
@@ -236,9 +236,9 @@ function step_user_pwrusr {
     # setup helix. doesn't honor xdg config, so symlink it
     New-Item -ItemType SymbolicLink -Path "C:\Users\$user\AppData\Roaming\helix" -Target "$config\helix"
 
-    # setup ssh
+    # setup ssh, over the empty authorized_keys mkpwrhome made
     $ssh = "C:\Users\$user\.ssh"
-    Copy-Item 'E:\.ssh\*' $ssh -Recurse
+    Copy-Item 'E:\.ssh\*' $ssh -Recurse -Force
     Get-ChildItem -LiteralPath $ssh -Recurse -Force -File |
         ForEach-Object { $_.IsReadOnly = ($_.Name -like 'id_*') }
         
